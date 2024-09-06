@@ -1,18 +1,41 @@
 "use client";
 
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { atom, useAtom } from "jotai";
 
-const displayScreen=atom("0");
-export default function Calculator() {
+const displayScreen = atom("0");
 
-  let [displayNumber, handleNumberClick]=useAtom(displayScreen);
-  let [displayOperatoion, handleOperationClick]=useAtom(displayScreen);
-  let [handleClear, handleClearClick]=useAtom(displayScreen);
-  let [calculate,displayResult]=useAtom(displayScreen);
-  let [deletLast,displayRenew]=useAtom(displayScreen);
+export default function Calculator() {
+  const [displayNumber, setDisplayNumber] = useAtom(displayScreen);
+  
+  const handleNumberClick = (num: number) => {
+    setDisplayNumber(displayNumber === "0" ? String(num) : displayNumber + String(num));
+  };
+
+  const handleOperationClick = (operator: string) => {
+    const lastChar = displayNumber.slice(-1);
+    if (!["+", "-", "*", "/"].includes(lastChar)) {
+      setDisplayNumber(displayNumber + operator);
+    }
+  };
+
+  const handleClearClick = () => {
+    setDisplayNumber("0");
+  };
+
+  const handleDeleteClick = () => {
+    setDisplayNumber(displayNumber.length > 1 ? displayNumber.slice(0, -1) : "0");
+  };
+
+  const handleResultClick = () => {
+    try {
+      setDisplayNumber(String(eval(displayNumber)));
+    } catch (error) {
+      setDisplayNumber("Error");
+    }
+  };
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -28,36 +51,34 @@ export default function Calculator() {
           {[7, 8, 9, 4, 5, 6, 1, 2, 3, 0].map((num) => (
             <Button
               key={num}
-              onClick={() => handleNumberClick(displayNumber==="0" ? displayNumber=String(num) : displayNumber+=num)}
+              onClick={() => handleNumberClick(num)}
               variant="outline"
             >
               {num}
             </Button>
           ))}
-          <Button onClick={() => handleOperationClick( displayOperatoion.slice(-1)!=="+" && displayOperatoion.slice(-1)!=="-" && displayOperatoion.slice(-1)!=="/" && displayOperatoion.slice(-1)!=="*" && displayOperatoion!=="0" ? displayOperatoion+="+" : displayOperatoion )} variant="secondary">
-            +
-          </Button>
-          <Button onClick={() => handleOperationClick( displayOperatoion.slice(-1)!=="+" && displayOperatoion.slice(-1)!=="-" && displayOperatoion.slice(-1)!=="/" && displayOperatoion.slice(-1)!=="*" && displayOperatoion!=="0" ? displayOperatoion+="-" : displayOperatoion )} variant="secondary">
-            -
-          </Button>
-          <Button onClick={() => handleOperationClick( displayOperatoion.slice(-1)!=="+" && displayOperatoion.slice(-1)!=="-" && displayOperatoion.slice(-1)!=="/" && displayOperatoion.slice(-1)!=="*" && displayOperatoion!=="0" ? displayOperatoion+="*" : displayOperatoion )} variant="secondary">
-            *
-          </Button>
-          <Button onClick={() => handleOperationClick( displayOperatoion.slice(-1)!=="+" && displayOperatoion.slice(-1)!=="-" && displayOperatoion.slice(-1)!=="/" && displayOperatoion.slice(-1)!=="*" && displayOperatoion!=="0" ? displayOperatoion+="/" : displayOperatoion )} variant="secondary">
-            /
-          </Button>          
-          <Button onClick={()=> displayRenew(deletLast.slice(0,-1))}  variant="destructive">
+          {['+','-','*','/'].map((operator) => (
+              <Button 
+                key={operator}
+                onClick={()=>handleOperationClick(operator)}
+                variant="secondary"
+              >
+                {operator}
+              </Button>
+            ))
+          }
+          <Button onClick={handleDeleteClick} variant="destructive">
             DEL
           </Button>
           <Button
-            onClick={()=> displayResult(calculate.slice(-1)!=="+" && calculate.slice(-1)!=="-" && calculate.slice(-1)!=="/" && calculate.slice(-1)!=="*" ? String(eval(calculate)) : calculate)}
+            onClick={handleResultClick}
             className="col-span-1"
             variant="default"
           >
             =
           </Button>
           <Button
-            onClick={()=>handleClearClick(handleClear="0")}
+            onClick={handleClearClick}
             className="col-span-4"
             variant="destructive"
           >
